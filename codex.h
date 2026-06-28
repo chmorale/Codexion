@@ -3,7 +3,7 @@ typedef struct s_data
 	pthread_t		*tid;
 	int				coders_num;
 	int				compile_nb;
-	int				dead;
+	int				burnout;
 	int				finished;
 	t_coders		*coders;
 	u_int64_t		burnout_time;
