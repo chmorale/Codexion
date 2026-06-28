@@ -12,7 +12,7 @@ typedef struct s_data
 	u_int64_t		refactor_time;
 	u_int64_t		dongle_cooldown;
 	str				scheduler;
-	pthread_mutex_t	*forks;
+	pthread_mutex_t	*dongle;
 	pthread_mutex_t	lock;
 	pthread_mutex_t	write;
 }	t_data;
