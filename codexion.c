@@ -30,7 +30,7 @@ int	main(int argc, char **argv)
 	    data -> scheduler = argv[8];
 	if (init(&data, argv, argc))
 		return (1);
-	if (data.philo_num == 1)
+	if (data.coder_num == 1)
 		return (case_one(&data));
 	if (thread_init(&data))
 		return (1);
