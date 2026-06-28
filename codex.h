@@ -1,15 +1,17 @@
 typedef struct s_data
 {
 	pthread_t		*tid;
-	int				philo_num;
-	int				meals_nb;
+	int				coders_num;
+	int				compile_nb;
 	int				dead;
 	int				finished;
-	t_philo			*philos;
-	u_int64_t		death_time;
-	u_int64_t		eat_time;
-	u_int64_t		sleep_time;
-	u_int64_t		start_time;
+	t_coders		*coders;
+	u_int64_t		burnout_time;
+	u_int64_t		compile_time;
+	u_int64_t		debug_time;
+	u_int64_t		refactor_time;
+	u_int64_t		dongle_cooldown;
+	str				scheduler;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	lock;
 	pthread_mutex_t	write;
