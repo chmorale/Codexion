@@ -13,3 +13,56 @@ Un flag (un entero 1 o 0). Indica si el dongle está físicamente libre sobre la
 Una marca de tiempo (timestamp en milisegundos) que indica cuándo termina el periodo de enfriamiento obligatorio (dongle_cooldown).  
 2. ¿Cómo sabe un Coder si el Dongle está libre?Cuando un programador intenta adquirir un dongle, la rutina debe evaluar el estado interno de la estructura bajo un flujo seguro para evitar condiciones de carrera:Bloquear el acceso: El hilo del programador hace pthread_mutex_lock(&dongle->mutex). Ahora tiene el control exclusivo para examinar los datos de ese dongle.  Comprobar disponibilidad básica: Revisa el flag is_available.  Si is_available == 0, el dongle está ocupado por otro programador. El hilo actual no puede cogerlo.  Comprobar el Cooldown: Si el flag indicaba que estaba libre (is_available == 1), el hilo debe mirar el reloj del sistema mediante gettimeofday() y compararlo con cooldown_end_time.  Si tiempo_actual < cooldown_end_time, significa que el dongle se liberó hace poco y aún se está enfriando. Por lo tanto, se considera ocupado/no disponible en ese momento.  Tomar el recurso: Si el dongle está libre (is_available == 1) y el tiempo de cooldown ya ha expirado (tiempo_actual >= cooldown_end_time), el programador cambia el flag a is_available = 0. Ya ha tomado el dongle con éxito.  Desbloquear el acceso: El hilo hace pthread_mutex_unlock(&dongle->mutex) para que otros hilos puedan interactuar con la estructura del dongle (por ejemplo, para ponerse en la cola de prioridad FIFO/EDF si está ocupado).  
 3. ¿Qué pasa al soltar el Dongle?Cuando el programador termina de compilar y devuelve el recurso a la mesa, debe actualizar el estado para reflejar el cooldown obligatorio:  Bloquea el mutex del dongle (pthread_mutex_lock).  Cambia el flag de disponibilidad para liberarlo: is_available = 1.  Calcula el momento exacto en que volverá a ser utilizable:$$\text{cooldown\_end\_time} = \text{tiempo\_actual} + \text{dongle\_cooldown}$$  Desbloquea el mutex (pthread_mutex_unlock).  Gracias a esta lógica, el estado "disponible" solo es real si el flag es afirmativo y el tiempo de enfriamiento ha quedado atrás en el reloj.
+
+======
+1. ¿Cómo se identifican y estructuran las Personas y los Dongles?
+Efectivamente, tu intuición es correcta: se realiza mediante estructuras (struct). Para gestionar el estado global, necesitas organizar la información en memoria de forma jerárquica.
+
+Normalmente se definen dos estructuras principales y una estructura global de control:
+
+Estructura del Dongle (Recurso compartido):
+Cada dongle es un recurso que solo puede usar una persona a la vez. No basta con una variable de estado (libre/ocupado); necesita un mecanismo de control de concurrencia llamado Mutex (mutua exclusión). El mutex actúa como el "candado" físico del dongle.
+
+Estructura de la Persona (Hilo de ejecución):
+Contiene sus datos individuales: su identificador (ID), su estado actual (programando, pensando, durmiendo), el tiempo de su última "comida" (o actividad crítica) y, muy importante, punteros a sus dos dongles asignados (el de su izquierda y el de su derecha).
+
+Estructura General / Controladora:
+Mantiene las reglas del programa (número de personas, tiempos límite) y un array con todas las estructuras de las personas y otro con todos los dongles.
+
+2. El rol de los Hilos (Threads) y los Mutex
+Aquí es donde debemos precisar un detalle crucial de tu planteamiento inicial. Hablabas de un "bucle que recorre las personas y empieza por la primera... y pasa a la siguiente".
+
+En programación secuencial tradicional, eso sería así. Pero con hilos, la filosofía cambia por completo:
+
+¿Para qué se usan los hilos?
+Cada persona no es un elemento pasivo dentro de un bucle de un único hilo. Cada persona es un hilo independiente que se ejecuta en paralelo y al mismo tiempo. El programa principal (main) solo ejecuta un bucle al inicio para crear e lanzar todos los hilos individuales. Una vez lanzados, el bucle del main termina (o se queda vigilando) y cada hilo "persona" cobra vida propia.
+
+¿Cuál es su finalidad y funcionamiento?
+La finalidad de usar hilos es simular que todas las personas intentan actuar de manera autónoma y simultánea.
+
+La rutina de cada hilo (persona) es un bucle infinito (hasta que el programa termine) que sigue estos pasos secuenciales:
+
+Intentar tomar el dongle izquierdo y el dongle derecho.
+
+Si los consigue, cambia su estado a programando y retiene los recursos durante un tiempo determinado.
+
+Soltar ambos dongles.
+
+Cambiar su estado a durmiendo / pensando durante otro periodo de tiempo.
+
+Repetir el ciclo.
+
+3. ¿Cómo influyen los hilos en el acceso a los Dongles? (La corrección de tu lógica)
+En tu planteamiento decías que la primera persona bloquea sus dongles, la segunda no puede y la tercera sí. Esto es lógicamente correcto en la teoría, pero en la práctica de la concurrencia, tú no controlas el orden en el que se ejecutan los hilos.
+
+Es el planificador del sistema operativo (scheduler) el que decide qué hilo se ejecuta en cada milisegundo. No hay garantía de que el hilo 1 intente coger los dongles antes que el hilo 2. Todos compiten a la vez.
+
+Para evitar que dos hilos modifiquen o alteren el estado de un dongle al mismo tiempo (lo que causaría una condición de carrera o race condition), se usan los mutex:
+
+Cuando la Persona A quiere el dongle izquierdo, ejecuta una función para bloquear (lock) el mutex de ese dongle.
+
+Si el dongle estaba libre, la Persona A se lo queda y continúa.
+
+Si la Persona B (su vecina) intenta bloquear el mismo dongle un milisegundo después, el sistema operativo congela el hilo de la Persona B. El hilo B se queda en espera automática y no consume CPU hasta que la Persona A desbloquee (unlock) ese mutex.
+
+Por tanto, el "bucle" de comprobación no lo haces tú recorriendo las personas uno a uno en el código; ocurre de forma orgánica en la memoria compartida gracias a que cada hilo intenta ejecutar su propia rutina y se topa con los candados (mutex) de los dongles.
