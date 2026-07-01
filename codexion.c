@@ -17,17 +17,17 @@ int	main(int argc, char **argv)
 {
 	t_data	data;
 	
-	if (argc != 8)
+	if (argc != 9)
 	{
 		printf("Error: Number incorrect of arguments.\n");
 		return (1);
 	}
 	if (input_checker(argv))
 		return (1);
-	if (argv[1][8] != "fifo" and argv[1][8] != "edf")
-	    return (1);
+	else if (strcmp(argv[8], "fifo") == 0 || strcmp(argv[8], "edf") == 0)
+	    data.scheduler = argv[8];
 	else
-	    data -> scheduler = argv[8];
+	    return (1);
 	if (init(&data, argv, argc))
 		return (1);
 	if (data.coder_num == 1)
@@ -42,14 +42,6 @@ int	main(int argc, char **argv)
 	
 	
 	
-	number_of_coders = 0;
-	time_to_burnout = 0;
-	time_to_compile = 0;
-	time_to_debug = 0;
-	time_to_refactor = 0;
-	number_of_compiles_required = 0;
-	dongle_cooldown = 0;
-	scheduler = "";
 	i = 1;
 	while (i < argc)
 	{
