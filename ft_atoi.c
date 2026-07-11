@@ -1,41 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chmorale <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 10:59:20 by chmorale          #+#    #+#             */
-/*   Updated: 2026/06/28 11:00:36 by chmorale         ###   ########.fr       */
+/*   Created: 2025/12/17 09:39:26 by chmorale          #+#    #+#             */
+/*   Updated: 2025/12/17 09:44:44 by chmorale         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "codex.h"
+#include "libft.h"
 
-
-int	input_checker(char **argv)
+int	ft_atoi(const char *nptr)
 {
-	int	i;
-	int	j;
+	int		i;
+	int		signo;
+	long	total;
 
-	i = 1;
-	while (argv[i] && i < 8)
+	total = 0;
+	i = 0;
+	signo = 1;
+	while ((nptr[i] > 8 && nptr[i] < 14) || (nptr[i] == 32))
+		i++;
+	if (nptr[i] == 45)
+		signo = -1;
+	if ((nptr[i] == 43) || (nptr[i] == 45))
+		i++;
+	while (nptr[i] >= '0' && nptr[i] <= '9')
 	{
-		j = 0;
-		while (argv[i][j])
-		{
-			if (argv[i][j] == ' ')
-			{
-				j++;
-				continue ;
-			}
-			if ((argv[i][j] < 48 || argv[i][j] > 57))
-				return (error(ERR_IN_1, NULL));
-			j++;
-		}
+		total = total * 10 + (nptr[i] - '0');
 		i++;
 	}
-	return (0);
+	total = (int)(total * signo);
+	return (total);
 }
-
-

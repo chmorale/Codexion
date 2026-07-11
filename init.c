@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "codex.h"
-#include <stdlib.h>
 
 
 int	alloc(t_data *data)
@@ -66,7 +65,7 @@ void	init_coders(t_data *data)
 	}
 }
 
-int	init_data(t_data *data, char **argv, int argc)
+int	init_data(t_data *data, char **argv)
 {
 	data->coder_num = (int) ft_atoi(argv[1]);
 	data->burnout_time = (u_int64_t) ft_atoi(argv[2]);
@@ -76,8 +75,9 @@ int	init_data(t_data *data, char **argv, int argc)
 	data->compiles_required = (int) ft_atoi(argv[6]);
     data->dongle_cooldown = (u_int64_t) ft_atoi(argv[7]);
   	data->scheduler = (char*) (argv[8]);
-	if (data->coder_num <= 0 || data->coder_num > 200 || data->burnout_time < 0
-		|| data->compile_time < 0 || data->refactor_time < 0)
+	// if (data->coder_num <= 0 || data->coder_num > 200 || data->burnout_time < 0
+	//	|| data->compile_time < 0 || data->refactor_time < 0)
+	if  (data->coder_num <= 0 || data->coder_num > 200)
 		return (error(ERR_IN_2, NULL));
 	data->burnout = 0;
 	data->finished = 0;
@@ -86,9 +86,9 @@ int	init_data(t_data *data, char **argv, int argc)
 	return (0);
 }
 
-int	init(t_data *data, char **argv, int argc)
+int	init(t_data *data, char **argv)
 {
-	if (init_data(data, argv, argc))
+	if (init_data(data, argv))
 		return (1);
 	if (alloc(data))
 		return (1);
