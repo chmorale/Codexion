@@ -12,8 +12,7 @@
 
 #include "codex.h"
 
-
-int	alloc(t_data *data)
+static int	alloc(t_data *data)
 {
 	data->tid = malloc(sizeof(pthread_t) * data->coder_num);
 	if (!data->tid)
@@ -27,7 +26,7 @@ int	alloc(t_data *data)
 	return (0);
 }
 
-int	init_dongles(t_data *data)
+static int	init_dongles(t_data *data)
 {
 	int	i;
 
@@ -47,7 +46,7 @@ int	init_dongles(t_data *data)
 	return (0);
 }
 
-void	init_coders(t_data *data)
+static void	init_coders(t_data *data)
 {
 	int	i;
 
@@ -65,7 +64,7 @@ void	init_coders(t_data *data)
 	}
 }
 
-int	init_data(t_data *data, char **argv)
+static int	init_data(t_data *data, char **argv)
 {
 	data->coder_num = (int) ft_atoi(argv[1]);
 	data->burnout_time = (u_int64_t) ft_atoi(argv[2]);
@@ -73,12 +72,10 @@ int	init_data(t_data *data, char **argv)
 	data->debug_time = (u_int64_t) ft_atoi(argv[4]);
 	data->refactor_time = (u_int64_t) ft_atoi(argv[5]);
 	data->compiles_required = (int) ft_atoi(argv[6]);
-    data->dongle_cooldown = (u_int64_t) ft_atoi(argv[7]);
-  	data->scheduler = (char*) (argv[8]);
-	// if (data->coder_num <= 0 || data->coder_num > 200 || data->burnout_time < 0
-	//	|| data->compile_time < 0 || data->refactor_time < 0)
-	if  (data->coder_num <= 0 || data->coder_num > 200)
-		return (error(ERR_IN_2, NULL));
+	data->dongle_cooldown = (u_int64_t) ft_atoi(argv[7]);
+	data->scheduler = (char *)(argv[8]);
+	if (data->coder_num <= 0 || data->coder_num > 200)
+		return (error(ERR_IN_2, data));
 	data->burnout = 0;
 	data->finished = 0;
 	pthread_mutex_init(&data->write, NULL);

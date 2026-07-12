@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chmorale <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 10:59:20 by chmorale          #+#    #+#             */
 /*   Updated: 2026/06/28 11:00:36 by chmorale         ###   ########.fr       */
@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "codex.h"
-
 
 int	input_checker(char **argv)
 {
@@ -38,4 +37,11 @@ int	input_checker(char **argv)
 	return (0);
 }
 
+long long	get_time(void)
+{
+	struct timeval	tv;
 
+	if (gettimeofday(&tv, NULL) == -1)
+		return (0);
+	return ((tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL));
+}

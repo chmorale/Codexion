@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chmorale <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 09:01:36 by chmorale          #+#    #+#             */
 /*   Updated: 2025/12/15 09:14:34 by chmorale         ###   ########.fr       */

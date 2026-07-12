@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chmorale <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 09:39:26 by chmorale          #+#    #+#             */
 /*   Updated: 2025/12/17 09:44:44 by chmorale         ###   ########.fr       */

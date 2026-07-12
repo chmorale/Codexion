@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra -Werror -Iincludes -pthread
 
 UTILS_DIR = utils/
 
-SRC = codexion.c utils.c init.c ft_atoi.c 
+SRC = actions.c clean_and_exit.c codexion.c dongle_access.c ft_atoi.c init.c parser.c simulation.c utils.c
 
 OBJ = $(SRC:.c=.o)
 
