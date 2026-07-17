@@ -15,23 +15,34 @@
 void	compile(t_data *data, t_coder *coder)
 {
 	if (data && coder)
-		printf("FALTA FUNC COOLDOWN");
+	{
+		print_status(coder, "coder is compiling");
+		usleep(coder->data->compile_time * 1000);
+	}
 }
 
 void	cooldown(t_data *data, t_coder *coder)
 {
 	if (data && coder)
-		printf("FALTA FUNC COOLDOWN");
+	{
+		usleep(coder->data->dongle_cooldown * 1000);
+	}
 }
 
 void	debug(t_data *data, t_coder *coder)
 {
 	if (data && coder)
-		printf("FALTA FUNC DEBUG");
+	{
+		print_status(coder, "coder is debuging");
+		usleep(coder->data->debug_time * 1000);
+	}
 }
 
 void	refactor(t_data *data, t_coder *coder)
 {
 	if (data && coder)
-		printf("FALTA FUNC REFACTOR");
+	{
+		print_status(coder, "coder is refactoring");
+		usleep(coder->data->refactor_time * 1000);
+	}
 }

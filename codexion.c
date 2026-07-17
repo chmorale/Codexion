@@ -16,6 +16,7 @@ int	main(int argc, char **argv)
 {
 	t_data	data;
 
+	memset(&data, 0, sizeof(t_data));
 	if (argc != 9)
 	{
 		printf("Error: Number incorrect of arguments.\n");
@@ -23,13 +24,9 @@ int	main(int argc, char **argv)
 	}
 	if (input_checker(argv))
 		return (1);
-	else if (strcmp(argv[8], "fifo") == 0 || strcmp(argv[8], "edf") == 0)
-		data.scheduler = argv[8];
-	else
-		return (1);
-	if (init(&data, argv))
-		return (1);
 	if (valid_data(&data, argv, argc))
+		return (1);
+	if (init(&data))
 		return (1);
 	if (thread_init(&data))
 		return (1);

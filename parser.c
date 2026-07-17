@@ -31,7 +31,7 @@ int	valid_data(t_data *data, char *argv[], int argc)
 	i = 1;
 	while (i < argc)
 	{
-		if (ft_atoi(argv[i]) <= 1 && i == 1)
+		if (ft_atoi(argv[i]) < 1 && i == 1)
 			return (printf("Error: Number of coders less than 0.\n"), 1);
 		if (ft_atoi(argv[i]) <= 0 && i == 2)
 			return (printf("Error: Time to burnout less than 0.\n"), 1);

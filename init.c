@@ -55,7 +55,7 @@ static void	init_coders(t_data *data)
 	{
 		data->coders[i].data = data;
 		data->coders[i].id = i + 1;
-		data->coders[i].time_to_burnout = data->burnout_time;
+		data->coders[i].time_to_burnout = data->init_time + data->burnout_time;
 		data->coders[i].compile_cont = 0;
 		data->coders[i].compiling = 0;
 		data->coders[i].status = 0;
@@ -64,33 +64,37 @@ static void	init_coders(t_data *data)
 	}
 }
 
-static int	init_data(t_data *data, char **argv)
+static t_heap *heap_create(int capacidad_inicial)
 {
-	data->coder_num = (int) ft_atoi(argv[1]);
-	data->burnout_time = (u_int64_t) ft_atoi(argv[2]);
-	data->compile_time = (u_int64_t) ft_atoi(argv[3]);
-	data->debug_time = (u_int64_t) ft_atoi(argv[4]);
-	data->refactor_time = (u_int64_t) ft_atoi(argv[5]);
-	data->compiles_required = (int) ft_atoi(argv[6]);
-	data->dongle_cooldown = (u_int64_t) ft_atoi(argv[7]);
-	data->scheduler = (char *)(argv[8]);
-	if (data->coder_num <= 0 || data->coder_num > 200)
-		return (error(ERR_IN_2, data));
-	data->burnout = 0;
-	data->finished = 0;
-	pthread_mutex_init(&data->write, NULL);
-	pthread_mutex_init(&data->lock, NULL);
-	return (0);
+	t_heap *heap;
+
+	heap = malloc(sizeof(t_heap));
+	if (!heap)
+		return (NULL);
+	heap->array = malloc(sizeof(t_coder *) * capacidad_inicial);
+	if (!heap->array)
+	{
+		free(heap);
+		return (NULL);
+	}
+	heap->size = 0;
+	heap->capacity = capacidad_inicial;
+	return (heap);
 }
 
-int	init(t_data *data, char **argv)
+int	init(t_data *data)
 {
-	if (init_data(data, argv))
+	data->heap = heap_create(data->coder_num);
+	if (!data->heap)
 		return (1);
+	data->init_time = get_time();
+	pthread_mutex_init(&data->write, NULL);
+	pthread_mutex_init(&data->lock, NULL);
 	if (alloc(data))
 		return (1);
 	if (init_dongles(data))
 		return (1);
 	init_coders(data);
+	data->finished = 0;
 	return (0);
 }

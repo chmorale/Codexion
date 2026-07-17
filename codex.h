@@ -25,6 +25,7 @@
 # include <string.h>
 # include <pthread.h>
 # include <sys/time.h>
+# include <unistd.h>
 
 typedef struct s_data	t_data;
 
@@ -42,9 +43,17 @@ typedef struct s_coder
 	struct s_data		*data;
 }	t_coder;
 
+typedef struct s_heap
+{
+	t_coder	**array;
+	int		size;
+	int		capacity;
+}	t_heap;
+
 typedef struct s_data
 {
 	int				coder_num;
+	u_int64_t		init_time;
 	u_int64_t		burnout_time;
 	u_int64_t		compile_time;
 	u_int64_t		debug_time;
@@ -60,21 +69,24 @@ typedef struct s_data
 	pthread_mutex_t	*dongles;
 	pthread_mutex_t	lock;
 	pthread_mutex_t	write;
+	t_heap			*heap;
 }	t_data;
 
 void		clean_and_exit(t_data *data);
-void		take_dongles_and_compile(t_coder *coder);
+void		take_dongles_and_compile(t_data *data, t_coder *coder);
 int			ft_atoi(const char *str);
-int			init(t_data *data, char **argv);
+int			init(t_data *data);
 int			valid_data(t_data *data, char *argv[], int argc);
 int			thread_init(t_data *data);
 int			input_checker(char **argv);
 int			is_most_urgent(t_data *data, t_coder *coder);
 int			error(char *msg, t_data *data);
+void		free_all(t_data *data);
 void		compile(t_data *data, t_coder *coder);
 void		cooldown(t_data *data, t_coder *coder);
 void		debug(t_data *data, t_coder *coder);
 void		refactor(t_data *data, t_coder *coder);
 long long	get_time(void);
+void		print_status(t_coder *coder, char *text);
 
 #endif
