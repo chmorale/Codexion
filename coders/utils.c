@@ -59,6 +59,5 @@ void	clean_and_exit(t_data *data)
 	if (data)
 	{
 		free_all(data);
-		printf("FIN");
 	}
 }
