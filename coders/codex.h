@@ -13,10 +13,9 @@
 #ifndef CODEX_H
 # define CODEX_H
 # define ERR_IN_1 "Error: Invalid character in arguments.\n"
-# define ALLOC_ERR_1 "Error: Pointers allocation failed.\n"
-# define ALLOC_ERR_2 "Error: Dongles allocation failed.\n"
-# define ALLOC_ERR_3 "Error: Coders allocation failed.\n"  
-# define ERR_IN_2    "Error: Invalid argument values.\n"
+# define ALLOC_ERR_1 "Error: Dongles allocation failed.\n"
+# define ALLOC_ERR_2 "Error: Coders allocation failed.\n"
+# define ALLOC_ERR_3 "Error: Dongle timestamp allocation failed.\n"
 
 # include <stdio.h>
 # include <sys/types.h>
@@ -29,16 +28,26 @@
 
 typedef struct s_data	t_data;
 
+typedef struct s_dongle_pair
+{
+	pthread_mutex_t	*first;
+	pthread_mutex_t	*second;
+	int				first_idx;
+	int				second_idx;
+}	t_dongle_pair;
+
 typedef struct s_coder
 {
 	int					id;
 	pthread_t			thread_id;
 	int					status;
-	int					compiling;
 	int					compile_cont;
 	uint64_t			time_to_burnout;
+	uint64_t			priority;
 	pthread_mutex_t		*l_dongle;
 	pthread_mutex_t		*r_dongle;
+	int					l_idx;
+	int					r_idx;
 	pthread_mutex_t		lock;
 	struct s_data		*data;
 }	t_coder;
@@ -60,10 +69,8 @@ typedef struct s_data
 	u_int64_t		refactor_time;
 	int				compiles_required;
 	u_int64_t		dongle_cooldown;
+	u_int64_t		*dongle_released_at;
 	char			*scheduler;
-	pthread_t		*tid;
-	int				compile_nb;
-	int				burnout;
 	int				finished;
 	t_coder			*coders;
 	pthread_mutex_t	*dongles;
@@ -73,20 +80,27 @@ typedef struct s_data
 }	t_data;
 
 void		clean_and_exit(t_data *data);
-void		take_dongles_and_compile(t_data *data, t_coder *coder);
-int			ft_atoi(const char *str);
+int			take_dongles_and_compile(t_data *data, t_coder *coder);
+int			ft_atoi(const char *nptr);
 int			init(t_data *data);
 int			valid_data(t_data *data, char *argv[], int argc);
 int			thread_init(t_data *data);
 int			input_checker(char **argv);
-int			is_most_urgent(t_data *data, t_coder *coder);
 int			error(char *msg, t_data *data);
 void		free_all(t_data *data);
 void		compile(t_data *data, t_coder *coder);
-void		cooldown(t_data *data, t_coder *coder);
 void		debug(t_data *data, t_coder *coder);
 void		refactor(t_data *data, t_coder *coder);
 long long	get_time(void);
 void		print_status(t_coder *coder, char *text);
+void		*routine(void *arg);
+void		free_coders(t_data *data);
+void		free_dongles(t_data *data);
+void		free_misc(t_data *data);
+void		select_dongles(t_coder *coder, t_dongle_pair *pair);
+void		do_compile(t_data *data, t_coder *coder, t_dongle_pair *pair);
+void		drop_dongle(pthread_mutex_t *dongle, int idx, t_data *data);
+void		heap_push(t_heap *heap, t_coder *coder);
+t_coder		*heap_pop(t_heap *heap);
 
 #endif

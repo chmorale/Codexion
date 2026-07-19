@@ -58,57 +58,11 @@ int	error(char *msg, t_data *data)
 
 void	free_all(t_data *data)
 {
-	int	i;
-
 	if (!data)
 		return ;
-	if (data->coders)
-	{
-		i = 0;
-		while (i < data->coder_num)
-		{
-			pthread_mutex_destroy(&data->coders[i].lock);
-			i++;
-		}
-		free(data->coders);
-		data->coders = NULL;
-	}
-	if (data->dongles)
-	{
-		i = 0;
-		while (i < data->coder_num)
-		{
-			pthread_mutex_destroy(&data->dongles[i]);
-			i++;
-		}
-		free(data->dongles);
-		data->dongles = NULL;
-	}
-	if (data->tid)
-	{
-		free(data->tid);
-		data->tid = NULL;
-	}
+	free_coders(data);
+	free_dongles(data);
+	free_misc(data);
 	pthread_mutex_destroy(&data->write);
 	pthread_mutex_destroy(&data->lock);
-}
-
-void heapify_up(t_heap *heap, int index)
-{
-	int		parent;
-	t_coder	*tmp;
-	
-	while (index > 0)
-	{
-		parent = (index - 1) / 2;
-		if (heap->array[index]->time_to_burnout < heap->array[parent]->time_to_burnout)
-		{
-			tmp = heap->array[index];
-			heap->array[index] = heap->array[parent];
-			heap->array[parent] = tmp; 
-			index = parent;
-		}
-		else
-			break;
-	}
 }

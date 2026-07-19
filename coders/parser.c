@@ -24,6 +24,27 @@ static void	asign_data(t_data *data, char *argv[])
 	data->scheduler = argv[8];
 }
 
+static int	check_arg(char *argv[], int i)
+{
+	if (ft_atoi(argv[i]) < 1 && i == 1)
+		return (printf("Error: Number of coders less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 2)
+		return (printf("Error: Time to burnout less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 3)
+		return (printf("Error: Time_to_compile less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 4)
+		return (printf("Error: Time_to_debug less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 5)
+		return (printf("Error: Time_to_refactor less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 6)
+		return (printf("Error: compiles_required less than 0.\n"), 1);
+	if (ft_atoi(argv[i]) <= 0 && i == 7)
+		return (printf("Error: dongle_cooldown less than 0.\n"), 1);
+	if ((strcmp(argv[i], "fifo") && strcmp(argv[i], "edf") && i == 8))
+		return (printf("Error: scheduler must be a  valid value.\n"), 1);
+	return (0);
+}
+
 int	valid_data(t_data *data, char *argv[], int argc)
 {
 	int	i;
@@ -31,22 +52,8 @@ int	valid_data(t_data *data, char *argv[], int argc)
 	i = 1;
 	while (i < argc)
 	{
-		if (ft_atoi(argv[i]) < 1 && i == 1)
-			return (printf("Error: Number of coders less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 2)
-			return (printf("Error: Time to burnout less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 3)
-			return (printf("Error: Time_to_compile less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 4)
-			return (printf("Error: Time_to_debug less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 5)
-			return (printf("Error: Time_to_refactor less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 6)
-			return (printf("Error: compiles_required less than 0.\n"), 1);
-		if (ft_atoi(argv[i]) <= 0 && i == 7)
-			return (printf("Error: dongle_cooldown less than 0.\n"), 1);
-		if ((strcmp(argv[i], "fifo") && strcmp(argv[i], "edf") && i == 8))
-			return (printf("Error: scheduler must be a  valid value.\n"), 1);
+		if (check_arg(argv, i))
+			return (1);
 		i++;
 	}
 	asign_data(data, argv);
