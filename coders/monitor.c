@@ -6,7 +6,7 @@
 /*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/18 09:56:14 by chmorale          #+#    #+#             */
-/*   Updated: 2026/07/18 09:56:24 by chmorale         ###   ########.fr       */
+/*   Updated: 2026/07/19 00:00:00 by chmorale         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ static void	*monitor_routine(void *arg)
 	while (!data->finished)
 	{
 		if (scan_coders(data))
+		{
 			data->finished = 1;
+			wake_all_dongles(data);
+		}
 		usleep(1000);
 	}
 	return (NULL);

@@ -6,33 +6,53 @@
 /*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/12 14:39:34 by chmorale          #+#    #+#             */
-/*   Updated: 2026/07/12 14:40:13 by chmorale         ###   ########.fr       */
+/*   Updated: 2026/07/19 00:00:00 by chmorale         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codex.h"
 
-static int	take_dongle(t_coder *coder, pthread_mutex_t *dongle, int idx)
+static void	build_deadline(struct timespec *ts)
 {
-	while (1)
-	{
-		if (coder->data->finished)
-			return (1);
-		if (pthread_mutex_trylock(dongle) == 0)
-		{
-			if ((u_int64_t)get_time() - coder->data->dongle_released_at[idx]
-				>= coder->data->dongle_cooldown)
-				return (0);
-			pthread_mutex_unlock(dongle);
-		}
-		usleep(200);
-	}
+	struct timeval	now;
+	long			ms;
+
+	gettimeofday(&now, NULL);
+	ms = (now.tv_usec / 1000) + 1;
+	ts->tv_sec = now.tv_sec + (ms / 1000);
+	ts->tv_nsec = (ms % 1000) * 1000000L;
 }
 
-void	drop_dongle(pthread_mutex_t *dongle, int idx, t_data *data)
+static int	take_dongle(t_coder *coder, t_dongle *dongle, t_data *data)
 {
-	data->dongle_released_at[idx] = get_time();
-	pthread_mutex_unlock(dongle);
+	struct timespec	ts;
+
+	pthread_mutex_lock(&dongle->mutex);
+	enqueue(dongle, coder);
+	while (!is_my_turn(dongle, coder, data) && !data->finished)
+	{
+		build_deadline(&ts);
+		pthread_cond_timedwait(&dongle->cond, &dongle->mutex, &ts);
+	}
+	dequeue(dongle, coder);
+	if (data->finished)
+	{
+		pthread_cond_broadcast(&dongle->cond);
+		pthread_mutex_unlock(&dongle->mutex);
+		return (1);
+	}
+	dongle->locked = 1;
+	pthread_mutex_unlock(&dongle->mutex);
+	return (0);
+}
+
+void	drop_dongle(t_dongle *dongle)
+{
+	pthread_mutex_lock(&dongle->mutex);
+	dongle->locked = 0;
+	dongle->released_at = get_time();
+	pthread_cond_broadcast(&dongle->cond);
+	pthread_mutex_unlock(&dongle->mutex);
 }
 
 void	print_status(t_coder *coder, char *text)
@@ -49,13 +69,14 @@ int	take_dongles_and_compile(t_data *data, t_coder *coder)
 {
 	t_dongle_pair	pair;
 
+	coder->arrival_ticket = next_ticket(data);
 	select_dongles(coder, &pair);
-	if (take_dongle(coder, pair.first, pair.first_idx))
+	if (take_dongle(coder, pair.first, data))
 		return (0);
 	print_status(coder, "has taken a dongle");
-	if (take_dongle(coder, pair.second, pair.second_idx))
+	if (take_dongle(coder, pair.second, data))
 	{
-		drop_dongle(pair.first, pair.first_idx, data);
+		drop_dongle(pair.first);
 		return (0);
 	}
 	print_status(coder, "has taken a dongle");

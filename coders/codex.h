@@ -6,7 +6,7 @@
 /*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 09:30:36 by chmorale          #+#    #+#             */
-/*   Updated: 2026/07/11 16:26:01 by chmorale         ###   ########.fr       */
+/*   Updated: 2026/07/19 00:00:00 by chmorale         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,26 @@
 # include <string.h>
 # include <pthread.h>
 # include <sys/time.h>
+# include <time.h>
 # include <unistd.h>
 
 typedef struct s_data	t_data;
+typedef struct s_coder	t_coder;
+
+typedef struct s_dongle
+{
+	pthread_mutex_t	mutex;
+	pthread_cond_t	cond;
+	int				locked;
+	u_int64_t		released_at;
+	t_coder			*waiters[2];
+	int				waiting_count;
+}	t_dongle;
 
 typedef struct s_dongle_pair
 {
-	pthread_mutex_t	*first;
-	pthread_mutex_t	*second;
-	int				first_idx;
-	int				second_idx;
+	t_dongle	*first;
+	t_dongle	*second;
 }	t_dongle_pair;
 
 typedef struct s_coder
@@ -44,10 +54,11 @@ typedef struct s_coder
 	int					compile_cont;
 	uint64_t			time_to_burnout;
 	uint64_t			priority;
-	pthread_mutex_t		*l_dongle;
-	pthread_mutex_t		*r_dongle;
+	t_dongle			*l_dongle;
+	t_dongle			*r_dongle;
 	int					l_idx;
 	int					r_idx;
+	u_int64_t			arrival_ticket;
 	pthread_mutex_t		lock;
 	struct s_data		*data;
 }	t_coder;
@@ -69,11 +80,12 @@ typedef struct s_data
 	u_int64_t		refactor_time;
 	int				compiles_required;
 	u_int64_t		dongle_cooldown;
-	u_int64_t		*dongle_released_at;
 	char			*scheduler;
 	int				finished;
 	t_coder			*coders;
-	pthread_mutex_t	*dongles;
+	t_dongle		*dongles;
+	u_int64_t		next_ticket;
+	pthread_mutex_t	ticket_lock;
 	pthread_mutex_t	lock;
 	pthread_mutex_t	write;
 	t_heap			*heap;
@@ -92,6 +104,7 @@ void		compile(t_data *data, t_coder *coder);
 void		debug(t_data *data, t_coder *coder);
 void		refactor(t_data *data, t_coder *coder);
 long long	get_time(void);
+u_int64_t	next_ticket(t_data *data);
 void		print_status(t_coder *coder, char *text);
 void		*routine(void *arg);
 void		free_coders(t_data *data);
@@ -99,7 +112,11 @@ void		free_dongles(t_data *data);
 void		free_misc(t_data *data);
 void		select_dongles(t_coder *coder, t_dongle_pair *pair);
 void		do_compile(t_data *data, t_coder *coder, t_dongle_pair *pair);
-void		drop_dongle(pthread_mutex_t *dongle, int idx, t_data *data);
+void		drop_dongle(t_dongle *dongle);
+int			is_my_turn(t_dongle *dongle, t_coder *coder, t_data *data);
+void		enqueue(t_dongle *dongle, t_coder *coder);
+void		dequeue(t_dongle *dongle, t_coder *coder);
+void		wake_all_dongles(t_data *data);
 void		heap_push(t_heap *heap, t_coder *coder);
 t_coder		*heap_pop(t_heap *heap);
 

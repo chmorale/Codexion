@@ -24,6 +24,26 @@ static void	asign_data(t_data *data, char *argv[])
 	data->scheduler = argv[8];
 }
 
+int	input_checker(char **argv)
+{
+	int	i;
+	int	j;
+
+	i = 1;
+	while (argv[i] && i < 8)
+	{
+		j = 0;
+		while (argv[i][j])
+		{
+			if ((argv[i][j] < 48 || argv[i][j] > 57))
+				return (error(ERR_IN_1, NULL));
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+
 static int	check_arg(char *argv[], int i)
 {
 	if (ft_atoi(argv[i]) < 1 && i == 1)

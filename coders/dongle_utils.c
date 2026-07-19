@@ -6,7 +6,7 @@
 /*   By: chmorale <chmorale@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/18 11:59:12 by chmorale          #+#    #+#             */
-/*   Updated: 2026/07/18 11:59:28 by chmorale         ###   ########.fr       */
+/*   Updated: 2026/07/19 00:00:00 by chmorale         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,26 +18,25 @@ void	select_dongles(t_coder *coder, t_dongle_pair *pair)
 	{
 		pair->first = coder->r_dongle;
 		pair->second = coder->l_dongle;
-		pair->first_idx = coder->r_idx;
-		pair->second_idx = coder->l_idx;
 	}
 	else
 	{
 		pair->first = coder->l_dongle;
 		pair->second = coder->r_dongle;
-		pair->first_idx = coder->l_idx;
-		pair->second_idx = coder->r_idx;
 	}
 }
 
 void	do_compile(t_data *data, t_coder *coder, t_dongle_pair *pair)
 {
+	u_int64_t	start_time;
+
 	coder->status = 1;
+	start_time = (u_int64_t)get_time();
 	compile(data, coder);
 	coder->compile_cont += 1;
-	coder->time_to_burnout = get_time() + data->burnout_time;
-	drop_dongle(pair->first, pair->first_idx, data);
-	drop_dongle(pair->second, pair->second_idx, data);
+	coder->time_to_burnout = start_time + data->burnout_time;
+	drop_dongle(pair->first);
+	drop_dongle(pair->second);
 	if (strcmp(data->scheduler, "edf") == 0
 		&& coder->compile_cont < data->compiles_required)
 	{
